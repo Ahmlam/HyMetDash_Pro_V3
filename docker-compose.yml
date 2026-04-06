@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  hymetdash:
+    build: .
+    container_name: hymetdash
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./assets:/app/assets
+    environment:
+      - MAPBOX_TOKEN=${MAPBOX_TOKEN:-}
+      - OGIMET_COUNTRY=${OGIMET_COUNTRY:-Cote}
+    restart: unless-stopped
+
+  # OGIMET auto-sync every 6 hours
+  ogimet-sync:
+    build: .
+    container_name: ogimet-sync
+    entrypoint: ["python", "ogimet_sync.py"]
+    volumes:
+      - ./data:/app/data
+    environment:
+      - OGIMET_COUNTRY=${OGIMET_COUNTRY:-Cote}
+      - OGIMET_WINDOW_HOURS=6
+      - OGIMET_WIDEN_HOURS=12
+    restart: "no"
+    # Use with: docker compose run ogimet-sync
+    # Or schedule via host cron:
+    # 0 */6 * * * cd /path/to/hymetdash && docker compose run --rm ogimet-sync

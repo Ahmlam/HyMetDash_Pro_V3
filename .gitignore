@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+*.log
+data/uploads/*
+!data/uploads/.gitkeep
+data/ogimet_sync/*.xlsx
+data/ogimet_sync/.last_sync
+config/settings.json
+.DS_Store
+*.tmp
