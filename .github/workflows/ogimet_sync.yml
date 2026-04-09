@@ -39,6 +39,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No new OGIMET data to commit."
           else
-            git commit -m "🌤️ Auto-sync OGIMET data $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git commit -m "🌤️ Auto-sync OGIMET data $(date -u +'%Y-%m-%d %h:%m UTC')"
             git push
           fi
