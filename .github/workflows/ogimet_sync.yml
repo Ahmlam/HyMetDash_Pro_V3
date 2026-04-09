@@ -2,13 +2,16 @@ name: OGIMET Data Sync
 
 on:
   schedule:
-    # Every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
     - cron: '0 */6 * * *'
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   sync-ogimet:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04   # 🔥 plus stable que latest
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ✅ corrige Node 20
+
     permissions:
       contents: write
 
@@ -20,25 +23,32 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'   # ⚡ accélère
 
       - name: Install dependencies
-        run: pip install requests pandas openpyxl
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run OGIMET sync
         env:
           OGIMET_COUNTRY: ${{ vars.OGIMET_COUNTRY || 'Cote' }}
           OGIMET_WINDOW_HOURS: ${{ vars.OGIMET_WINDOW_HOURS || '6' }}
           OGIMET_WIDEN_HOURS: ${{ vars.OGIMET_WIDEN_HOURS || '12' }}
-        run: python ogimet_sync.py
+        run: |
+          echo "Running OGIMET sync..."
+          python ogimet_sync.py
 
       - name: Commit and push new data
         run: |
-          git config --local user.email "hymetdash-bot@sodexam.ci"
-          git config --local user.name "HyMetDash OGIMET Bot"
-          git add data/ogimet_sync/
+          git config --global user.email "hymetdash-bot@sodexam.ci"
+          git config --global user.name "HyMetDash OGIMET Bot"
+
+          git add data/ogimet_sync/ || true
+
           if git diff --staged --quiet; then
             echo "No new OGIMET data to commit."
           else
-            git commit -m "🌤️ Auto-sync OGIMET data $(date -u +'%Y-%m-%d %h:%m UTC')"
-            git push
+            git commit -m "🌤️ Auto-sync OGIMET data $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push origin HEAD:main
           fi
