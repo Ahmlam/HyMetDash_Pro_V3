@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04   # 🔥 plus stable que latest
 
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true  # ✅ corrige Node 20
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ✅ corrige Node 20
 
     permissions:
       contents: write
